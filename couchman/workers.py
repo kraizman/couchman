@@ -1,0 +1,233 @@
+import multiprocessing
+from time import sleep,time
+from datetime import datetime 
+
+import logging
+from config import DATETIME_FMT
+from couchdb import Server
+import sys
+
+class ServerWorker(multiprocessing.Process):
+    
+    def __init__(self,pipe,server):
+        multiprocessing.Process.__init__(self)
+        self.pipe = pipe
+        self.server = server
+        self.flag = True
+        self.address = server['url']
+        self.db_server = Server(self.address)
+        try:
+            self.update_period = float(server.get('autoupdate'))
+        except:
+            self.update_period = None
+        
+        self.last_update = time()
+    
+    def update(self):
+        #logging.debug("worker: update command for %s" % self.address)
+        try:
+            tasks = self.db_server.tasks()
+            ver = "ver. %s" % self.db_server.version
+            server_enabled = True;
+        except:
+            tasks = None
+            ver = "-"
+            server_enabled = False;
+            
+        self.last_update = time()
+        #datetime = date.strftime(DATETIME_FMT)
+        
+        
+        self.pipe.send({"command": "update_server", 
+                        "url": self.server['url'],
+                        "data":{"enabled": server_enabled,
+                                "updated": datetime.now(),
+                                "version": ver,
+                                "tasks": tasks}})
+        
+    def run(self):
+        while self.flag:
+            while self.pipe.poll():
+                data = self.pipe.recv()
+                print 'worker:', data
+                if "command" in data:
+                    command = data['command']
+                    if command == "update_server":
+                        print "worker: update command"
+                        
+                        self.update()
+                    elif command == "update_data":
+                        print "worker: update data command"
+                        self.server = data['data']
+                        self.address = self.server['url']
+                        self.db_server = Server(self.address)
+                        try:
+                            self.update_period = float(self.server.get('autoupdate'))
+                        except:
+                            self.update_period = None
+                        
+                    elif command == "shutdown":
+                        print 'worker: shutdown command for %s' % self.address
+                        logging.debug("worker: shutdown command for %s" % self.address)
+                        self.flag = False
+                        
+                        return
+                
+            sleep(0.05)
+            
+            if self.update_period and time() > self.last_update + self.update_period:
+                self.update()
+                
+                
+
+class ReplicationWorker(multiprocessing.Process):
+    
+    def __init__(self,pipe,data):
+        multiprocessing.Process.__init__(self)
+        self.pipe = pipe
+        self.source = data.get('source')
+        self.target = data.get('target')
+        self.continuous = data.get('continuous')
+        self.proxy = data.get('proxy')
+        self.flag = True
+        server = data.get('server')
+        self.server_address = server.get('url')
+        self.db_server = Server(self.server_address)
+        self.flag = True
+        
+        
+    def run(self):
+        print "run replication worker for",self.server_address
+        logging.debug("replication worker: run replication worker for %s" % self.server_address)
+        while self.flag:
+            while self.pipe.poll():
+                print "replication worker of %s sync" % self.server_address
+                data = self.pipe.recv()
+                print 'worker:', data
+                if "command" in data:
+                    command = data['command']
+                    if command == "start_replication":
+                        error = None
+                        if self.continuous:
+                            try:
+                                self.db_server.replicate(self.source, self.target, continuous=True)
+                            except:
+                                logging.debug("worker: replication creation error for %s" % self.server_address)
+                                error = sys.exc_info()[1]
+                        else:
+                            try:
+                                self.db_server.replicate(self.source, self.target)
+                            except:
+                                logging.debug("worker: replication creation error for %s" % self.server_address)
+                                error = sys.exc_info()[1]
+                            
+                        if error:
+                            self.pipe.send({
+                                "command":'error',
+                                "url": self.server_address,
+                                "error": error,
+                                "source": self.source,
+                                "target": self.source,
+                                "continuous": self.continuous,
+                            })
+                        else:
+                            self.pipe.send({
+                                "command": "done",
+                                "message": "Replication start successfully. Details:",
+                                "url": self.server_address,
+                                "source": self.source,
+                                "target": self.target,
+                                "continuous": self.continuous,
+                            })
+                        self.flag = False
+                    elif command == "stop_replication":
+                        error = None
+                        try:
+                            self.db_server.replicate(self.source, self.target,continuous=True, cancel = True)
+                            self.continuous = True
+                        except:
+                            print "continuous stop fail"
+                            try:
+                                self.db_server.replicate(self.source, self.target, cancel = True)
+                                self.continuous = False
+                            except:
+                                error = sys.exc_info()[1]
+                        if error:
+                            self.pipe.send({
+                                "command": 'error',
+                                "url": self.server_address,
+                                "error": error,
+                                "source": self.source,
+                                "target": self.source,
+                                "continuous": self.continuous,
+                            })
+                        else:
+                            self.pipe.send({
+                                "command": "done",
+                                "message": "Replication stop successfully. Details:",
+                                "url": self.server_address,
+                                "source": self.source,
+                                "target": self.target,
+                                "continuous": self.continuous,
+                            })
+                        self.flag = False       
+                               
+                    if command == "shutdown":
+                        print 'worker: shutdown command for %s' % self.server_address
+                        logging.debug("worker: shutdown command for %s" % self.server_address)
+                        self.flag = False
+                        
+                        return      
+            sleep(0.5)
+            
+class ViewWorker(multiprocessing.Process):
+    
+    def __init__(self,pipe,url,command,db_name,params):
+        multiprocessing.Process.__init__(self)
+        self.pipe = pipe
+        self.params = params
+        self.command = command
+        self.address = url
+        self.db_server = Server(self.address)
+        self.db = self.db_server[db_name]
+        
+    
+    def send_error(self, error):
+        self.pipe.send({"command":self.command,
+                        "url": self.address,
+                        "updated": datetime.now(),
+                        "db_name": self.db.name,
+                        "params": self.params,
+                        "error": error,
+                        })
+    
+    def send_result(self, result):
+        self.pipe.send({"command":self.command,
+                        "url": self.address,
+                        "updated": datetime.now(),
+                        "db_name": self.db.name,
+                        "params": self.params,
+                        "result": result,
+                        })
+    
+    def run(self):
+        if self.command == "get_info":
+            try:
+                result = self.db.design_info(self.params["row_id"])
+                self.send_result(result)
+            except:
+                self.send_error(sys.exc_info()[1])
+        elif self.command == "ping":
+            try:
+                doc_name = self.db['_design/' + self.params["view_name"]].views.keys()[0]
+                self.db.view(self.params["view_name"] + '/' + doc_name, limit = 0).rows
+                self.send_result("")
+            except:
+                self.send_error(sys.exc_info()[1])
+            
+
+
+            
+        
+            
+        
