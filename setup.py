@@ -7,7 +7,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    install_requires = ['couchdb>=0.6'],
     name = "couchman",
     version = "0.3",
     author = "Pavel Krayzman",

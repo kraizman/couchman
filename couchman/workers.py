@@ -35,8 +35,7 @@ class ServerWorker(multiprocessing.Process):
             server_enabled = False;
             
         self.last_update = time()
-        #datetime = date.strftime(DATETIME_FMT)
-        
+   
         
         self.pipe.send({"command": "update_server", 
                         "url": self.server['url'],

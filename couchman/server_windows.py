@@ -62,62 +62,68 @@ class ServerWindow(QWidget):
                     self.ui.cmb_group.setCurrentIndex(i)
             i += 1
         
+        
+        
         print "init new sever window complete"
         
             
     def btn_add_react(self):
-        conflict_server = self.mainWindow.server_model.getServByAddress(str(self.ui.txt_url.text()))
-        if conflict_server:
+        #validating
         
-            QMessageBox(QMessageBox.Warning, 'Warning', 'Record for address %s already exist!!!' % str(self.ui.txt_url.text()), QtGui.QMessageBox.Ok).exec_()
+        if self.validate():
         
-        else: 
-            servObj = {}
-            servObj["name"] = str(self.ui.txt_name.text())
-            servObj["url"] = str(self.ui.txt_url.text())
-            servObj["group"] = str(self.ui.cmb_group.currentText())
-            servObj["enabled"] = str(self.ui.chb_enabled.checkState())
-            servObj["date"] = datetime.now().strftime(DATE_FORMAT)
-            servObj["proxy"] = str(self.ui.txt_proxy.text())
-            servObj["replications"] = []
-            if self.ui.group_autoupdate.isChecked():
-                servObj["autoupdate"] = self.ui.spin_time.value()
-            else:
-                servObj["autoupdate"] = 'None'
-            self.mainWindow.dump_server_record(servObj)
-            self.mainWindow.start_worker('server', servObj)
         
+            conflict_server = self.mainWindow.server_model.getServByAddress(str(self.ui.txt_url.text()))
+            if conflict_server:
             
+                QMessageBox(QMessageBox.Warning, 'Warning', 'Record for address %s already exist!!!' % str(self.ui.txt_url.text()), QtGui.QMessageBox.Ok).exec_()
             
+            else: 
+                servObj = {}
+                servObj["name"] = str(self.ui.txt_name.text())
+                servObj["url"] = str(self.ui.txt_url.text())
+                servObj["group"] = str(self.ui.cmb_group.currentText())
+                servObj["enabled"] = str(self.ui.chb_enabled.checkState())
+                servObj["date"] = datetime.now().strftime(DATE_FORMAT)
+                servObj["proxy"] = str(self.ui.txt_proxy.text())
+                servObj["replications"] = []
+                if self.ui.group_autoupdate.isChecked():
+                    servObj["autoupdate"] = self.ui.spin_time.value()
+                else:
+                    servObj["autoupdate"] = 'None'
+                self.mainWindow.dump_server_record(servObj)
+                self.mainWindow.start_worker('server', servObj)
             
-            
-            self.close()
+                self.close()
             
     def btn_edit_react(self):
         print 'save changes'
         
-        url = self.serv_data["url"]
+        if self.validate():
         
-        self.serv_data["name"] = str(self.ui.txt_name.text())
-        self.serv_data["url"] = str(self.ui.txt_url.text())
-        self.serv_data["group"] = str(self.ui.cmb_group.currentText())
-        self.serv_data["enabled"] = str(self.ui.chb_enabled.checkState())
-        self.serv_data["date"] = datetime.now().strftime(DATE_FORMAT)
-        self.serv_data["proxy"] = str(self.ui.txt_proxy.text())
-        if self.ui.group_autoupdate.isChecked():
-            self.serv_data["autoupdate"] = self.ui.spin_time.value()
-        else:
-            self.serv_data["autoupdate"] = 'None'
         
-        if self.mainWindow.myJson.save():
-            self.mainWindow.server_workers[self.serv_data["url"]] = self.mainWindow.server_workers[url]
-            obj = self.mainWindow.server_workers[self.serv_data["url"]]
-            pipe = obj['pipe']
-            pipe.send({"command":'update_data', "data":self.serv_data})
-            self.mainWindow.server_model.update_data()
-            self.close()
-        else:
-            logging.debug('save server changes fail')
+            url = self.serv_data["url"]
+            
+            self.serv_data["name"] = str(self.ui.txt_name.text())
+            self.serv_data["url"] = str(self.ui.txt_url.text())
+            self.serv_data["group"] = str(self.ui.cmb_group.currentText())
+            self.serv_data["enabled"] = str(self.ui.chb_enabled.checkState())
+            self.serv_data["date"] = datetime.now().strftime(DATE_FORMAT)
+            self.serv_data["proxy"] = str(self.ui.txt_proxy.text())
+            if self.ui.group_autoupdate.isChecked():
+                self.serv_data["autoupdate"] = self.ui.spin_time.value()
+            else:
+                self.serv_data["autoupdate"] = 'None'
+            
+            if self.mainWindow.myJson.save():
+                self.mainWindow.server_workers[self.serv_data["url"]] = self.mainWindow.server_workers[url]
+                obj = self.mainWindow.server_workers[self.serv_data["url"]]
+                pipe = obj['pipe']
+                pipe.send({"command":'update_data', "data":self.serv_data})
+                self.mainWindow.server_model.update_data()
+                self.close()
+            else:
+                logging.debug('save server changes fail')
             
     def btn_cancel_react(self):
         self.close()
@@ -179,7 +185,31 @@ class ServerWindow(QWidget):
             QMessageBox(QMessageBox.Information, 'Test Result', 'Server with couchDB does exist in %s.\nDB version: %s' % (str(self.ui.txt_url.text()), version), QtGui.QMessageBox.Ok).exec_()
         else:
             QMessageBox(QMessageBox.Warning, 'Test Result', 'Server with couchDB does not exist in %s' % str(self.ui.txt_url.text()), QtGui.QMessageBox.Ok).exec_()
-
+    
+    
+    def validate(self):
+        if str(self.ui.txt_name.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Name field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+        
+        if str(self.ui.txt_host.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Host field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+        
+        if str(self.ui.txt_url.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Url field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+        
+        if self.ui.group_proxy.isChecked() and str(self.ui.txt_proxy.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Since proxy are enabled the Proxy field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+        
+        if self.ui.grp_login.isChecked() and (str(self.ui.txt_login.text()) == "" or str(self.ui.txt_password.text()) == ""):
+            QMessageBox(QMessageBox.Critical, 'Error', 'Since authentication are enabled the Login and password fields are required', QtGui.QMessageBox.Ok).exec_()
+            return False        
+        
+        return True                            
+    
     def closeEvent(self,event):
         try:
             self.mainWindow.server_windows.remove(self)

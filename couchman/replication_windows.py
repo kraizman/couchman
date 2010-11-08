@@ -33,29 +33,43 @@ class ReplicationWindow(QWidget):
     def add_react(self):
         """Slot for signal "clicked()" of "Add" button 
         """
-        source = str(self.ui.txt_source.text())
-        target = str(self.ui.txt_target.text())
-        proxy = str(self.ui.txt_proxy.text())
+        if self.validate():
         
-        if source.startswith("http"):
-            if not source.endswith("/"):
-                source += "/"
-        if target.startswith("http"):
-            if not target.endswith("/"):
-                target += "/"
-        
-        new_relication = {'source': source, 'target': target, 'proxy': proxy}
-
-        if new_relication in self.server_obj.get('replications'):
-            QMessageBox(QMessageBox.Warning, 'Warning', 'Record for this replication already exist!!!', QtGui.QMessageBox.Ok).exec_()
-        else:
-            self.mainWindow.dump_replication_record(self.server_obj, new_relication)
-            self.close()
+            source = str(self.ui.txt_source.text())
+            target = str(self.ui.txt_target.text())
+            proxy = str(self.ui.txt_proxy.text())
+            
+            if source.startswith("http"):
+                if not source.endswith("/"):
+                    source += "/"
+            if target.startswith("http"):
+                if not target.endswith("/"):
+                    target += "/"
+            
+            new_relication = {'source': source, 'target': target, 'proxy': proxy}
+    
+            if new_relication in self.server_obj.get('replications'):
+                QMessageBox(QMessageBox.Warning, 'Warning', 'Record for this replication already exist!!!', QtGui.QMessageBox.Ok).exec_()
+            else:
+                self.mainWindow.dump_replication_record(self.server_obj, new_relication)
+                self.close()
                 
         
                    
     def cancel_react(self):
         self.close()
+    
+    
+    def validate(self):
+        if str(self.ui.txt_source.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Source field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+        
+        if str(self.ui.txt_target.text()) == "":
+            QMessageBox(QMessageBox.Critical, 'Error', 'Target field are required', QtGui.QMessageBox.Ok).exec_()
+            return False
+    
+        return True
         
     def closeEvent(self,event):
         try:
