@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Thu Nov  4 16:04:34 2010
+# Created: Thu Nov 18 13:31:04 2010
 #      by: PyQt4 UI code generator 4.7.7
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,7 @@ class Ui_MainWindow(object):
         self.tlw_servers.setItemsExpandable(False)
         self.tlw_servers.setSortingEnabled(True)
         self.tlw_servers.setWordWrap(True)
+        self.tlw_servers.setExpandsOnDoubleClick(False)
         self.tlw_servers.setObjectName(_fromUtf8("tlw_servers"))
         self.verticalLayout_2.addWidget(self.tlw_servers)
         self.gridLayout_2 = QtGui.QGridLayout()
@@ -128,6 +129,8 @@ class Ui_MainWindow(object):
         self.tlw_replications = ServersList(self.layoutWidget1)
         self.tlw_replications.setAlternatingRowColors(True)
         self.tlw_replications.setRootIsDecorated(False)
+        self.tlw_replications.setItemsExpandable(False)
+        self.tlw_replications.setExpandsOnDoubleClick(False)
         self.tlw_replications.setObjectName(_fromUtf8("tlw_replications"))
         self.verticalLayout.addWidget(self.tlw_replications)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()

@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         logging.debug('MainWindow: Getting data from json file')
         self.MAIN_DB = self.myJson.readFromDB()
         
+       
         #set model for server treeview
         logging.debug("MainWindow: set model for server treeview list")
         self.server_model = ServerTreeModel(self)
@@ -106,7 +107,7 @@ class MainWindow(QMainWindow):
             connector.start()
             self_pipe.send({'command':'update_server'})
         elif type == 'replication':
-            logging.debug("MainWindow: start replication worker for %s" % data["url"])
+            logging.debug("MainWindow: start replication worker for %s" % data["server"])
             self_pipe, remote_pipe = multiprocessing.Pipe(duplex = True)
             connector = ReplicationWorker(remote_pipe,data)
             self.replication_workers.append({"pipe":self_pipe,"thread":remote_pipe})

@@ -20,6 +20,12 @@ class ReplicationWindow(QWidget):
         self.ui.btn_save.setText("Add")
         self.connect(self.ui.btn_save, QtCore.SIGNAL("clicked()"), self.add_react)
         
+        self.connect(self.ui.txt_source, QtCore.SIGNAL("returnPressed()"), self.add_react)
+        self.connect(self.ui.txt_target, QtCore.SIGNAL("returnPressed()"), self.add_react)
+        self.connect(self.ui.txt_proxy, QtCore.SIGNAL("returnPressed()"), self.add_react)
+        
+        self.connect(self, QtCore.SIGNAL("keyPressEvent( QKeyEvent *)"), self.key_pressed)
+        
         if cur_type == 0:
             txt_lst = replication_record.get('task').split(' ')
            
@@ -28,7 +34,9 @@ class ReplicationWindow(QWidget):
             
             self.ui.txt_source.setText(task_source)
             self.ui.txt_target.setText(task_target)
-            
+      
+    def key_pressed(self,event):    
+        print "key pressed ",event.key  
             
     def add_react(self):
         """Slot for signal "clicked()" of "Add" button 

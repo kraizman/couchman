@@ -42,7 +42,7 @@ class DBManager(QWidget):
         self.connect(self.ui.btn_compact_views, QtCore.SIGNAL("clicked()"), self.btn_compact_views_react)
         self.connect(self.ui.btn_compact, QtCore.SIGNAL("clicked()"), self.btn_compact_react)
         
-        print ROOT_DIR
+
         self.ui.btn_refresh_all.setIcon(QtGui.QIcon(ROOT_DIR+'/media/refresh.png'))
         
         self.ui.btn_clean_views.setIcon(QtGui.QIcon(ROOT_DIR+'/media/clean.png'))
@@ -81,13 +81,13 @@ class DBManager(QWidget):
             db_names = []       
             for db in self.selected_server:
                 if self.cur_server_dbs.get(db) is None:
-                    self.cur_server_dbs[db] = {"last_refresh":"Unknown"}
+                    self.cur_server_dbs[db] = {"last_refresh":"Unknown", "name":db, "size":"", "docs":""}
                     
                 db_names.append(db)
             db_names.sort()
             
       
-            self.db_model = DBListModel(db_names)
+            self.db_model = DBListModel(self.cur_server_dbs, db_names)
             self.ui.tlw_db_list.setModel(self.db_model)
             
             if len(db_names):
@@ -109,7 +109,8 @@ class DBManager(QWidget):
         self.ui.btn_compact_views.setEnabled(False)
         self.ui.btn_ping.setEnabled(False)
         
-        #get views list
+        for i in range(self.db_model.columnCount()):
+            self.ui.tlw_db_list.resizeColumnToContents(i) 
         
         
     def db_selection_changed(self, index):
@@ -165,11 +166,14 @@ class DBManager(QWidget):
         """
         cur_timestamp = datetime.now()
         self.cur_server_dbs[self.selected_db.name]['last_refresh'] = cur_timestamp
+        self.cur_server_dbs[self.selected_db.name]['size'] = 0
+        self.cur_server_dbs[self.selected_db.name]['docs'] = 0
         self.ui.lbl_last_update.setText(cur_timestamp.strftime(DATETIME_FMT))
         for row in self.view_model.view_list:
             self.start_view_worker("get_info", {"row_id": row['id']})
             row["refreshing"] = "now"
         self.view_model.update_data()
+        self.db_model.update_data()
         
     def btn_ping_react(self):
         """Slot for signal "clicked()" of "Ping" button
@@ -323,9 +327,19 @@ Error: %s''' % (data["command"], data['url'], data['db_name'], data["params"], d
                             row_heandler = db_heandler[data['params']["row_id"]]
                             result_heandler = data['result']
                             row_heandler['view_index'] = result_heandler['view_index']
+                            ##update size of db
+                            try:
+                                self.cur_server_dbs[self.selected_db.name]['size'] += int(row_heandler['view_index']['disk_size'])
+                            except:
+                                print "error adding size"
+                        
                             row_heandler["refreshing"] = "ready"
                             remove_ready.append(worker_obj)
                             flag_was_changes = True
+                            
+
+                            
+                            
                         elif data["command"] == "ping":
                             QMessageBox(QMessageBox.Information, 'Information', 
 '''Ping complete successfully!!!
@@ -343,8 +357,12 @@ Done on: %s''' % (data['url'], data['db_name'], data["params"]["view_name"], dat
         
         if flag_was_changes:
             self.view_model.update_data()
+            self.db_model.update_data()
             for i in range(self.view_model.columnCount()):
                 self.ui.tlw_view_list.resizeColumnToContents(i) 
+            
+            self.ui.tlw_db_list.resizeColumnToContents(1) 
+
         
     def closeEvent(self,event):
         try:

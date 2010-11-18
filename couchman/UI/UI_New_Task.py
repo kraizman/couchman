@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'new_task.ui'
 #
-# Created: Thu Oct 28 10:03:59 2010
+# Created: Thu Nov 18 13:34:42 2010
 #      by: PyQt4 UI code generator 4.7.7
 #
 # WARNING! All changes made in this file will be lost!
@@ -18,7 +18,7 @@ class Ui_New_Task_Form(object):
     def setupUi(self, New_Task_Form):
         New_Task_Form.setObjectName(_fromUtf8("New_Task_Form"))
         New_Task_Form.setWindowModality(QtCore.Qt.NonModal)
-        New_Task_Form.resize(364, 154)
+        New_Task_Form.resize(600, 154)
         self.verticalLayout = QtGui.QVBoxLayout(New_Task_Form)
         self.verticalLayout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))

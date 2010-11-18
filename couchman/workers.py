@@ -126,7 +126,7 @@ class ReplicationWorker(multiprocessing.Process):
                                 "url": self.server_address,
                                 "error": error,
                                 "source": self.source,
-                                "target": self.source,
+                                "target": self.target,
                                 "continuous": self.continuous,
                             })
                         else:

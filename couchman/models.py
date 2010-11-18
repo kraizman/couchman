@@ -139,7 +139,7 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
     
     
     def data(self, index, role):
-        if not index.isValid():
+        if not index.isValid() or index.row() < 0:
             return None
         if self.need_rendering:
             self.render()
@@ -247,11 +247,13 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
 
         
 class DBListModel(QtCore.QAbstractTableModel):
-    def __init__(self, db_list,parent = None):
+    def __init__(self, server_dbs, db_list,parent = None):
         super(DBListModel, self).__init__(parent)
-        self.db_list = [] 
-        self.headers = ["Database"]
-        print type(db_list)
+        self.db_list = []#{'names':[], 'sizes':[], 'docs':[]} 
+        self.server_dbs = {}
+        self.headers = ("Database", "Size(MB)", "Documents",)
+        if server_dbs:
+            self.server_dbs = server_dbs
         if db_list:
             self.db_list = db_list       
 
@@ -275,9 +277,26 @@ class DBListModel(QtCore.QAbstractTableModel):
         if not index.isValid():
             return None
         if role == QtCore.Qt.DisplayRole:
-            return self.db_list[index.row()]
+            if index.column() == 0:
+                return self.db_list[index.row()]
+            elif index.column() == 1:
+                name = self.db_list[index.row()]
+                size_byte = self.server_dbs[name]["size"]
+                if size_byte == "":
+                    return size_byte
+                size_in_mb = size_byte #float(size_byte)/2048
+                return size_in_mb
+            elif index.column() == 2:
+                name = self.db_list[index.row()]
+                return self.server_dbs[name]["docs"]
+
         elif role == QtCore.Qt.DecorationRole:
-            return QtGui.QIcon(ROOT_DIR+'/media/database.png')
+            if index.column() == 0:
+                return QtGui.QIcon(ROOT_DIR+'/media/database.png')
+            
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if index.column() !=0:
+                return QtCore.Qt.AlignRight
         return None
     
     
@@ -289,8 +308,8 @@ class DBViewModel(QtCore.QAbstractTableModel):
     def __init__(self, view_list,parent = None):
         super(DBViewModel, self).__init__(parent)
         self.view_list = [] 
-        self.headers = (" ", "Name", "Revision","Signature", "Size", "Language", "Clients", "Update", "P.S.", "C.R.", "W.C.", "U.R.", )
-        self.colum_tips = ("Status", "View name", "Revision of View", "Signature of View", "Size on disk", "Programming language of View",
+        self.headers = (" ", "Name", "Revision","Signature", "Size(MB)", "Language", "Clients", "Update", "P.S.", "C.R.", "W.C.", "U.R.", )
+        self.colum_tips = ("Status", "View name", "Revision of View", "Signature of View", "Size on disk in MB", "Programming language of View",
                            "Waiting clients", "Update sequence", "Purge sequence", "Is compact running (+ equals True, - equals False)",
                            "Is waiting commit (+ equals True, - equals False)", "Is updater running (+ equals True, - equals False)",  )
         if view_list:
@@ -331,7 +350,9 @@ class DBViewModel(QtCore.QAbstractTableModel):
                 if index.column() == 3:
                     return self.view_list[index.row()].get('view_index').get('signature')
                 elif index.column() == 4:
-                    return self.view_list[index.row()].get('view_index').get('disk_size')
+                    size_byte = self.view_list[index.row()].get('view_index').get('disk_size')
+                    size_in_mb = float(size_byte)/1024/1024
+                    return size_in_mb
                 elif index.column() == 5:
                     return self.view_list[index.row()].get('view_index').get('language')
                 elif index.column() == 6:
@@ -367,7 +388,12 @@ class DBViewModel(QtCore.QAbstractTableModel):
                
         elif role == VIEW_INFO_ROLE:
             return self.view_list[index.row()]
-                
+        
+        elif role == QtCore.Qt.TextAlignmentRole:
+            if self.view_list[index.row()].get('view_index'):
+                if index.column() == 4 or index.column() == 6 or index.column() == 7 or index.column() == 8:
+                    return QtCore.Qt.AlignRight
+                    
         return None
     
     
