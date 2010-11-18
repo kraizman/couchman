@@ -308,7 +308,7 @@ class DBViewModel(QtCore.QAbstractTableModel):
     def __init__(self, view_list,parent = None):
         super(DBViewModel, self).__init__(parent)
         self.view_list = [] 
-        self.headers = (" ", "Name", "Revision","Signature", "Size(MB)", "Language", "Clients", "Update", "P.S.", "C.R.", "W.C.", "U.R.", )
+        self.headers = (" ", "Name", "Revision","Signature", "Size", "Language", "Clients", "Update", "P.S.", "C.R.", "W.C.", "U.R.", )
         self.colum_tips = ("Status", "View name", "Revision of View", "Signature of View", "Size on disk in MB", "Programming language of View",
                            "Waiting clients", "Update sequence", "Purge sequence", "Is compact running (+ equals True, - equals False)",
                            "Is waiting commit (+ equals True, - equals False)", "Is updater running (+ equals True, - equals False)",  )
@@ -351,8 +351,8 @@ class DBViewModel(QtCore.QAbstractTableModel):
                     return self.view_list[index.row()].get('view_index').get('signature')
                 elif index.column() == 4:
                     size_byte = self.view_list[index.row()].get('view_index').get('disk_size')
-                    size_in_mb = float(size_byte)/1024/1024
-                    return size_in_mb
+                        
+                    return self.splitthousands(str(size_byte))
                 elif index.column() == 5:
                     return self.view_list[index.row()].get('view_index').get('language')
                 elif index.column() == 6:
@@ -396,7 +396,10 @@ class DBViewModel(QtCore.QAbstractTableModel):
                     
         return None
     
-    
+    def splitthousands(self,s, sep=','):  
+        if len(s) <= 3: return s  
+        return self.splitthousands(s[:-3], sep) + sep + s[-3:]
+
     def update_data(self):
         self.emit(QtCore.SIGNAL('layoutChanged()'))
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex &, const QModelIndex &)'), self.index(0,0), self.index(self.rowCount(),self.columnCount()))

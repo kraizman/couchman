@@ -327,12 +327,6 @@ Error: %s''' % (data["command"], data['url'], data['db_name'], data["params"], d
                             row_heandler = db_heandler[data['params']["row_id"]]
                             result_heandler = data['result']
                             row_heandler['view_index'] = result_heandler['view_index']
-                            ##update size of db
-                            try:
-                                self.cur_server_dbs[self.selected_db.name]['size'] += int(row_heandler['view_index']['disk_size'])
-                            except:
-                                print "error adding size"
-                        
                             row_heandler["refreshing"] = "ready"
                             remove_ready.append(worker_obj)
                             flag_was_changes = True
@@ -357,11 +351,9 @@ Done on: %s''' % (data['url'], data['db_name'], data["params"]["view_name"], dat
         
         if flag_was_changes:
             self.view_model.update_data()
-            self.db_model.update_data()
             for i in range(self.view_model.columnCount()):
                 self.ui.tlw_view_list.resizeColumnToContents(i) 
             
-            self.ui.tlw_db_list.resizeColumnToContents(1) 
 
         
     def closeEvent(self,event):
