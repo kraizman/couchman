@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 from models import DBListModel, DBViewModel
 from config import *
 from workers import ViewWorker
-from couchdb import Server 
+from couchdbcurl import Server 
 from datetime import datetime 
 import multiprocessing
 import sys
@@ -81,7 +81,8 @@ class DBManager(QWidget):
             db_names = []       
             for db in self.selected_server:
                 if self.cur_server_dbs.get(db) is None:
-                    self.cur_server_dbs[db] = {"last_refresh":"Unknown", "name":db, "size":"", "docs":""}
+                    info = self.selected_server[db].info()
+                    self.cur_server_dbs[db] = {"last_refresh":"Unknown", "name":db, "size":info['disk_size'], "docs":info['doc_count']}
                     
                 db_names.append(db)
             db_names.sort()

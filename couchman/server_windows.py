@@ -4,7 +4,7 @@ from PyQt4.QtGui import *
 from datetime import datetime
 import sys
 from config import *
-from couchdb import Server
+from couchdbcurl import Server
 import logging
 import urlparse
 

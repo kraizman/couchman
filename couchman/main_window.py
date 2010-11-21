@@ -1,7 +1,7 @@
 from UI.UI_MainWindow import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-from couchdb import Server
+from couchdbcurl import Server
 from models import ServerTreeModel, TaskTreeModel
 from server_windows import ServerWindow
 from replication_windows import ReplicationWindow

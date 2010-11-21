@@ -251,7 +251,7 @@ class DBListModel(QtCore.QAbstractTableModel):
         super(DBListModel, self).__init__(parent)
         self.db_list = []#{'names':[], 'sizes':[], 'docs':[]} 
         self.server_dbs = {}
-        self.headers = ("Database", "Size(MB)", "Documents",)
+        self.headers = ("Database", "Size", "Documents",)
         if server_dbs:
             self.server_dbs = server_dbs
         if db_list:
@@ -282,13 +282,10 @@ class DBListModel(QtCore.QAbstractTableModel):
             elif index.column() == 1:
                 name = self.db_list[index.row()]
                 size_byte = self.server_dbs[name]["size"]
-                if size_byte == "":
-                    return size_byte
-                size_in_mb = size_byte #float(size_byte)/2048
-                return size_in_mb
+                return self.splitthousands(str(size_byte))
             elif index.column() == 2:
                 name = self.db_list[index.row()]
-                return self.server_dbs[name]["docs"]
+                return self.splitthousands(str(self.server_dbs[name]["docs"]))
 
         elif role == QtCore.Qt.DecorationRole:
             if index.column() == 0:
@@ -299,6 +296,9 @@ class DBListModel(QtCore.QAbstractTableModel):
                 return QtCore.Qt.AlignRight
         return None
     
+    def splitthousands(self,s, sep=','):  
+        if len(s) <= 3: return s  
+        return self.splitthousands(s[:-3], sep) + sep + s[-3:]
     
     def update_data(self):
         self.emit(QtCore.SIGNAL('layoutChanged()'))
@@ -396,9 +396,6 @@ class DBViewModel(QtCore.QAbstractTableModel):
                     
         return None
     
-    def splitthousands(self,s, sep=','):  
-        if len(s) <= 3: return s  
-        return self.splitthousands(s[:-3], sep) + sep + s[-3:]
 
     def update_data(self):
         self.emit(QtCore.SIGNAL('layoutChanged()'))

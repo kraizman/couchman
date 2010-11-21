@@ -4,7 +4,7 @@ from datetime import datetime
 
 import logging
 from config import DATETIME_FMT
-from couchdb import Server
+from couchdbcurl import Server
 import sys
 
 class ServerWorker(multiprocessing.Process):
