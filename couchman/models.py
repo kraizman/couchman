@@ -396,6 +396,9 @@ class DBViewModel(QtCore.QAbstractTableModel):
                     
         return None
     
+    def splitthousands(self,s, sep=','):  
+        if len(s) <= 3: return s  
+        return self.splitthousands(s[:-3], sep) + sep + s[-3:]
 
     def update_data(self):
         self.emit(QtCore.SIGNAL('layoutChanged()'))

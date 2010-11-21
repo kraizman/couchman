@@ -167,8 +167,11 @@ class DBManager(QWidget):
         """
         cur_timestamp = datetime.now()
         self.cur_server_dbs[self.selected_db.name]['last_refresh'] = cur_timestamp
-        self.cur_server_dbs[self.selected_db.name]['size'] = 0
-        self.cur_server_dbs[self.selected_db.name]['docs'] = 0
+        
+        info = self.selected_server[self.selected_db.name].info()
+        self.cur_server_dbs[self.selected_db.name]["size"] = info['disk_size']
+        self.cur_server_dbs[self.selected_db.name]["docs"] = info['doc_count']
+        
         self.ui.lbl_last_update.setText(cur_timestamp.strftime(DATETIME_FMT))
         for row in self.view_model.view_list:
             self.start_view_worker("get_info", {"row_id": row['id']})
