@@ -393,7 +393,6 @@ class MainWindow(QMainWindow):
         if QMessageBox(QMessageBox.Warning, 'Warning', 'Remove records for "%s"?' % (selectedServer.get('url')), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
             
             pos = self.ui.tlw_servers.currentIndex().row()
-            print "terminate worker"
             item = self.server_workers[selectedServer['url']]
             item['thread'].terminate()
             
@@ -441,8 +440,8 @@ class MainWindow(QMainWindow):
                 data = worker.recv()
                 if "command" in data:
                     if data["command"] == "update_server":
-                        print "timer: update server status for %s" % data["url"]
-                        print "new task list: %s" % data.get('tasks')
+                        #print "timer: update server status for %s" % data["url"]
+                        #print "new task list: %s" % data.get('tasks')
                         self.update_server_data(data.get("url"), data.get("data"))
         
         for rep in self.replication_workers:
@@ -520,7 +519,7 @@ Error details:
             win.close()
         
         
-        print "MainWindow: terminate server workers"
+        #print "MainWindow: terminate server workers"
         for key in self.server_workers:
             worker = self.server_workers[key]
             worker.get('thread').terminate()

@@ -20,8 +20,8 @@ class ReplicationWindow(QWidget):
         self.ui.btn_save.setText("Add")
         self.connect(self.ui.btn_save, QtCore.SIGNAL("clicked()"), self.add_react)
         
-        self.connect(self.ui.txt_source, QtCore.SIGNAL("returnPressed()"), self.add_react)
-        self.connect(self.ui.txt_target, QtCore.SIGNAL("returnPressed()"), self.add_react)
+        self.connect(self.ui.txt_remotesource, QtCore.SIGNAL("returnPressed()"), self.add_react)
+        self.connect(self.ui.txt_remotetarget, QtCore.SIGNAL("returnPressed()"), self.add_react)
         self.connect(self.ui.txt_proxy, QtCore.SIGNAL("returnPressed()"), self.add_react)
         
         self.connect(self, QtCore.SIGNAL("keyPressEvent( QKeyEvent *)"), self.key_pressed)
