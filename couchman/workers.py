@@ -86,8 +86,10 @@ class ReplicationWorker(multiprocessing.Process):
         self.pipe = pipe
         self.source = data.get('source')
         self.target = data.get('target')
+        self.filter = data.get('filter',"")
+        self.query = data.get('query', "")
         self.continuous = data.get('continuous')
-        self.proxy = data.get('proxy')
+        self.proxy = data.get('proxy', "")
         self.flag = True
         server = data.get('server')
         self.server_address = server.get('url')
@@ -109,13 +111,13 @@ class ReplicationWorker(multiprocessing.Process):
                         error = None
                         if self.continuous:
                             try:
-                                self.db_server.replicate(self.source, self.target, continuous=True)
+                                self.db_server.replicate(self.source, self.target, filter=self.filter, query=self.query, proxy=self.proxy, continuous=True)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]
                         else:
                             try:
-                                self.db_server.replicate(self.source, self.target)
+                                self.db_server.replicate(self.source, self.target, filter=self.filter, query=self.query, proxy=self.proxy)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]
@@ -127,6 +129,9 @@ class ReplicationWorker(multiprocessing.Process):
                                 "error": error,
                                 "source": self.source,
                                 "target": self.target,
+                                "filter": self.filter,
+                                "query": self.query,
+                                "proxy": self.proxy,
                                 "continuous": self.continuous,
                             })
                         else:
@@ -136,6 +141,9 @@ class ReplicationWorker(multiprocessing.Process):
                                 "url": self.server_address,
                                 "source": self.source,
                                 "target": self.target,
+                                "filter": self.filter,
+                                "query": self.query,
+                                "proxy": self.proxy,
                                 "continuous": self.continuous,
                             })
                         self.flag = False
@@ -158,6 +166,9 @@ class ReplicationWorker(multiprocessing.Process):
                                 "error": error,
                                 "source": self.source,
                                 "target": self.source,
+                                "filter": self.filter,
+                                "query": self.query,
+                                "proxy": self.proxy,
                                 "continuous": self.continuous,
                             })
                         else:
@@ -167,6 +178,9 @@ class ReplicationWorker(multiprocessing.Process):
                                 "url": self.server_address,
                                 "source": self.source,
                                 "target": self.target,
+                                "filter": self.filter,
+                                "query": self.query,
+                                "proxy": self.proxy,
                                 "continuous": self.continuous,
                             })
                         self.flag = False       

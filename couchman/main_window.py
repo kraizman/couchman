@@ -331,6 +331,8 @@ class MainWindow(QMainWindow):
                                             'source': task_source,
                                             'target': task_target,
                                             'continuous': type,
+                                            'filter': selected_task.get('filter'),
+                                            'query': selected_task.get('query'),
                                             'server': selectedServer,
                                             })
             pipe.send({'command': 'start_replication'})

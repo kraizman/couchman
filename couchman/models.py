@@ -170,7 +170,10 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
             else:
                 return QtGui.QBrush()
         elif role == TASK_INFO_ROLE:
-            return self.tasks_rendered[index.row()]
+            try:
+                return self.tasks_rendered[index.row()]
+            except:
+                return None
 
         return None
     

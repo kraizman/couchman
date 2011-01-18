@@ -64,7 +64,6 @@ class ServerWindow(QWidget):
         
         
         
-        print "init new sever window complete"
         
             
     def btn_add_react(self):
