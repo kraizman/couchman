@@ -87,6 +87,7 @@ class ReplicationWorker(multiprocessing.Process):
         self.source = data.get('source')
         self.target = data.get('target')
         self.filter = data.get('filter',"")
+        print "init",repr(self.filter)
         self.query = data.get('query', "")
         self.continuous = data.get('continuous')
         self.proxy = data.get('proxy', "")
@@ -109,15 +110,25 @@ class ReplicationWorker(multiprocessing.Process):
                     command = data['command']
                     if command == "start_replication":
                         error = None
+                        args = {}
+                        if self.proxy:
+                            args['proxy'] = self.proxy
+                        if self.filter:
+                            args['filter'] = self.filter
+                            if self.query:
+                                args['query_params'] = self.query
                         if self.continuous:
+                            print "test cont",repr(self.filter)
                             try:
-                                self.db_server.replicate(self.source, self.target, filter=self.filter, query=self.query, proxy=self.proxy, continuous=True)
+                                self.db_server.replicate(self.source, self.target, continuous=True, **args)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]
                         else:
+                            print "test",repr(self.filter)
+                            
                             try:
-                                self.db_server.replicate(self.source, self.target, filter=self.filter, query=self.query, proxy=self.proxy)
+                                self.db_server.replicate(self.source, self.target, **args)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]

@@ -324,15 +324,18 @@ class MainWindow(QMainWindow):
 '''Start replication
     {source: "%s"
     target: "%s"
-    continuous: %s} ? 
-    ''' % (task_source, task_target, type), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
+    continuous: %s
+    filter: %s
+    query: %s} ? 
+    ''' % (task_source, task_target, type, selected_task.get('filter',""), selected_task.get('query',"")), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
             logging.debug("MainWindow: start replication, continuous %s" % type)
             pipe = self.start_worker('replication',{
                                             'source': task_source,
                                             'target': task_target,
                                             'continuous': type,
-                                            'filter': selected_task.get('filter'),
-                                            'query': selected_task.get('query'),
+                                            'filter': selected_task.get('filter', ""),
+                                            'query': selected_task.get('query', ""),
+                                            'proxy': selected_task.get('proxy', ""),
                                             'server': selectedServer,
                                             })
             pipe.send({'command': 'start_replication'})
