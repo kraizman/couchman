@@ -384,7 +384,8 @@ class MainWindow(QMainWindow):
             pipe = self.server_workers.get(server.get('url')).get('pipe')
             pipe.send({"command": 'update_server'})
         else:
-            print "error saving"
+            #print "error saving"
+            logging.debug('MainWindow:error saving')
     
     def dump_server_record(self,record):
         """Dump server record to persisted list
@@ -396,7 +397,8 @@ class MainWindow(QMainWindow):
             self.model_list[record['url']] = tasks_model 
             self.server_model.update_data()
         else:
-            print "error saving"
+            #print "error saving"
+            logging.debug('MainWindow:error saving')
     
     def btn_rm_server_react(self):
         """Slot for Signal"clicked()" of "Remove server" button
@@ -454,6 +456,7 @@ class MainWindow(QMainWindow):
                     if data["command"] == "update_server":
                         #print "timer: update server status for %s" % data["url"]
                         #print "new task list: %s" % data.get('tasks')
+                        
                         self.update_server_data(data.get("url"), data.get("data"))
         
         for rep in self.replication_workers:
@@ -543,6 +546,7 @@ Error details:
         
         
         #print "MainWindow: terminate server workers"
+        logging.debug('MainWindow:terminate server workers')
         for key in self.server_workers:
             worker = self.server_workers[key]
             worker.get('thread').terminate()

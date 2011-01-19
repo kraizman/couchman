@@ -105,8 +105,7 @@ class ReplicationWindow(QWidget):
                 db =  db_list[1]
 
         filter_list = []
-        print server
-        print db
+
         try:
             remote_serv = Server(server)
             remote_db = remote_serv[db]
@@ -173,7 +172,7 @@ class ReplicationWindow(QWidget):
                     target += "/"
             
             new_relication = {'source': source, 'target': target, 'proxy': proxy, 'filter': filter, 'query': query}
-            print "replication %s" % new_relication
+
             if new_relication in self.server_obj.get('replications'):
                 QMessageBox(QMessageBox.Warning, 'Warning', 'Record for this replication already exist!!!', QtGui.QMessageBox.Ok).exec_()
             else:
@@ -201,6 +200,6 @@ class ReplicationWindow(QWidget):
         try:
             self.mainWindow.replication_windows.remove(self)
         except:
-            print "error removing from replication windows list"
-        
+            #print "error removing from replication windows list"
+            logging.debug('ReplicationWindow: error removing from replication windows list')
         

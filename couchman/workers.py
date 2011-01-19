@@ -48,15 +48,14 @@ class ServerWorker(multiprocessing.Process):
         while self.flag:
             while self.pipe.poll():
                 data = self.pipe.recv()
-                print 'worker:', data
+
                 if "command" in data:
                     command = data['command']
                     if command == "update_server":
-                        print "worker: update command"
+
                         
                         self.update()
                     elif command == "update_data":
-                        print "worker: update data command"
                         self.server = data['data']
                         self.address = self.server['url']
                         self.db_server = Server(self.address)
@@ -66,7 +65,6 @@ class ServerWorker(multiprocessing.Process):
                             self.update_period = None
                         
                     elif command == "shutdown":
-                        print 'worker: shutdown command for %s' % self.address
                         logging.debug("worker: shutdown command for %s" % self.address)
                         self.flag = False
                         
@@ -87,7 +85,7 @@ class ReplicationWorker(multiprocessing.Process):
         self.source = data.get('source')
         self.target = data.get('target')
         self.filter = data.get('filter',"")
-        print "init",repr(self.filter)
+
         self.query = data.get('query', "")
         self.continuous = data.get('continuous')
         self.proxy = data.get('proxy', "")
@@ -99,13 +97,11 @@ class ReplicationWorker(multiprocessing.Process):
         
         
     def run(self):
-        print "run replication worker for",self.server_address
+
         logging.debug("replication worker: run replication worker for %s" % self.server_address)
         while self.flag:
             while self.pipe.poll():
-                print "replication worker of %s sync" % self.server_address
                 data = self.pipe.recv()
-                print 'worker:', data
                 if "command" in data:
                     command = data['command']
                     if command == "start_replication":
@@ -118,14 +114,12 @@ class ReplicationWorker(multiprocessing.Process):
                             if self.query:
                                 args['query_params'] = self.query
                         if self.continuous:
-                            print "test cont",repr(self.filter)
                             try:
                                 self.db_server.replicate(self.source, self.target, continuous=True, **args)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]
                         else:
-                            print "test",repr(self.filter)
                             
                             try:
                                 self.db_server.replicate(self.source, self.target, **args)
@@ -164,7 +158,6 @@ class ReplicationWorker(multiprocessing.Process):
                             self.db_server.replicate(self.source, self.target,continuous=True, cancel = True)
                             self.continuous = True
                         except:
-                            print "continuous stop fail"
                             try:
                                 self.db_server.replicate(self.source, self.target, cancel = True)
                                 self.continuous = False
@@ -197,7 +190,6 @@ class ReplicationWorker(multiprocessing.Process):
                         self.flag = False       
                                
                     if command == "shutdown":
-                        print 'worker: shutdown command for %s' % self.server_address
                         logging.debug("worker: shutdown command for %s" % self.server_address)
                         self.flag = False
                         

@@ -96,7 +96,6 @@ class ServerWindow(QWidget):
                 self.close()
             
     def btn_edit_react(self):
-        print 'save changes'
         
         if self.validate():
         
@@ -213,6 +212,6 @@ class ServerWindow(QWidget):
         try:
             self.mainWindow.server_windows.remove(self)
         except:
-            print "error removing from server windows list"
-        
+            #print "error removing from server windows list"
+             logging.debug('ReplicationWindow: error removing from server windows list')
         

@@ -89,11 +89,9 @@ class ServerTreeModel(QtCore.QAbstractTableModel):
     def removeServRecord(self,serv_obj):
         try:
             self.servers.remove(serv_obj)
-            print "serverModel: remove server complete"
             logging.debug("ServerModel: remove record complete")
             self.update_data()
         except:
-            print "serverModel: remove server error"
             logging.debug("ServerModel: remove record error")
         
     def update_data(self):

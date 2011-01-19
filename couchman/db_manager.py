@@ -7,6 +7,7 @@ from workers import ViewWorker
 from couchdbcurl import Server 
 from datetime import datetime 
 import multiprocessing
+import logging
 import sys
 
 class DBManager(QWidget):
@@ -261,7 +262,7 @@ Date: %s''' % (self.server['url'], self.selected_db.name, datetime.now().strftim
             try:
                 for view in self.view_model.view_list:
                     result = self.selected_db.compact_view(view["name"])
-                    print "%s: %s" % (view["name"], (lambda:"Yes", lambda:"No")[result](),)
+                    #print "%s: %s" % (view["name"], (lambda:"Yes", lambda:"No")[result](),)
                     result_arr.append("%s: %s" % (view["name"], {True: "Yes", False: "No"}[result],))
                 report = "\n".join(["%s" % d for d in result_arr])
                 QMessageBox(QMessageBox.Information, 'Information', 
@@ -364,6 +365,6 @@ Done on: %s''' % (data['url'], data['db_name'], data["params"]["view_name"], dat
         try:
             self.mainWindow.dbmanager_windows.remove(self)
         except:
-            print "error removing from db manager windows list"
-            
+            #print "error removing from db manager windows list"
+             logging.debug('ReplicationWindow: error removing from db manager windows list')
         
