@@ -310,7 +310,7 @@ class MainWindow(QMainWindow):
         """
         selected_task = self.tasks_model.data(self.ui.tlw_replications.currentIndex(), TASK_INFO_ROLE)
         selectedServer = self.ui.tlw_servers.model().data(self.ui.tlw_servers.currentIndex(), SERVER_INFO_ROLE)
-
+        print selected_task
         txt_lst = selected_task.get('task').split(' ')
         if selected_task.get('record_type') != 2:
             task_source = txt_lst[1]

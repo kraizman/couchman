@@ -186,11 +186,11 @@ class ReplicationWindow(QWidget):
     
     
     def validate(self):
-        if not self.ui.rdb_localsource.isChecked() and str(self.ui.txt_remotesource.text()) == "":
+        if not self.ui.rdb_localsource.isChecked() and not str(self.ui.txt_remotesource.text()):
             QMessageBox(QMessageBox.Critical, 'Error', 'Source field are required', QtGui.QMessageBox.Ok).exec_()
             return False
         
-        if not self.ui.rdb_localtarget.isChecked() and str(self.ui.txt_remotetarget.text()) == "":
+        if not self.ui.rdb_localtarget.isChecked() and not str(self.ui.txt_remotetarget.text()):
             QMessageBox(QMessageBox.Critical, 'Error', 'Target field are required', QtGui.QMessageBox.Ok).exec_()
             return False
     

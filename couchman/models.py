@@ -119,6 +119,7 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
         self.runetime = []
         self.need_rendering = True
         self.server_list = serv_obj['replications']
+
         self.server_obj = serv_obj
         self.headers = ("Type", "Task", "Status", "Pid", "Info")
         self.active_brush = QtGui.QBrush()
@@ -247,7 +248,7 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
         
         for rec in nonactive:
             msg = "%s -> %s" % (rec['source'], rec['target'])
-            self.tasks_rendered.append({'task': msg,'record_type': 2})
+            self.tasks_rendered.append({'task': msg,'record_type': 2, 'proxy': rec.get('proxy',""), 'filter': rec.get('filter', ""), 'query': rec.get('query',"")})
         
         self.need_rendering = False
         self.update_data()
