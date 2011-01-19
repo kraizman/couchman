@@ -120,7 +120,7 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
         self.need_rendering = True
         self.server_list = serv_obj['replications']
         self.server_obj = serv_obj
-        self.headers = ("Type", "Task", "Status", "Pid")
+        self.headers = ("Type", "Task", "Status", "Pid", "Info")
         self.active_brush = QtGui.QBrush()
         self.active_brush.setColor(QtGui.QColor(0,200,0))
         
@@ -159,6 +159,13 @@ class TaskTreeModel(QtCore.QAbstractTableModel):
                     return self.tasks_rendered[index.row()].get('pid')
                 else:
                     return ""
+            if index.column() == 4:
+                 if self.tasks_rendered[index.row()].get('record_type') == 2:
+                     return "proxy: %s, filter: %s, query_params: %s" % (self.tasks_rendered[index.row()].get('proxy', ""),
+                                                                         self.tasks_rendered[index.row()].get('filter', ""),
+                                                                         self.tasks_rendered[index.row()].get('query', ""))
+                 else:
+                     return ""
             
         elif role == QtCore.Qt.ForegroundRole:
             if self.tasks_rendered[index.row()].get('record_type') == 1:
