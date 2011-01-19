@@ -325,9 +325,10 @@ class MainWindow(QMainWindow):
     {source: "%s"
     target: "%s"
     continuous: %s
+    proxy: %s
     filter: %s
     query: %s} ? 
-    ''' % (task_source, task_target, type, selected_task.get('filter',""), selected_task.get('query',"")), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
+    ''' % (task_source, task_target, type, selected_task.get('proxy',""), selected_task.get('filter',""), selected_task.get('query',"")), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
             logging.debug("MainWindow: start replication, continuous %s" % type)
             pipe = self.start_worker('replication',{
                                             'source': task_source,
@@ -355,12 +356,18 @@ class MainWindow(QMainWindow):
         if QMessageBox(QMessageBox.Question, 'Warning', 
 '''Stop replication
     {source: "%s"
-    target: "%s"} ? 
-    ''' % (task_source, task_target), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
+    target: "%s"
+    proxy: %s
+    filter: %s
+    query: %s} ? 
+    ''' % (task_source, task_target, selected_task.get('proxy',""), selected_task.get('filter',""), selected_task.get('query',"")), QtGui.QMessageBox.Yes | QtGui.QMessageBox.No).exec_() == QtGui.QMessageBox.Yes:
             logging.debug("MainWindow: stop replication")
             pipe =self.start_worker('replication', {
                                             'source': task_source,
                                             'target': task_target,
+                                            'filter': selected_task.get('filter', ""),
+                                            'query': selected_task.get('query', ""),
+                                            'proxy': selected_task.get('proxy', ""),
                                             'server': selectedServer,
                                             })
             pipe.send({'command': 'stop_replication'})
@@ -462,14 +469,25 @@ Error details:
      Replication source: "%s"
      Replication target: "%s"
      continuous: %s
-     error: %s ''' % (data.get('source'), data.get('target'), data.get('continuous'), data.get('error')), QtGui.QMessageBox.Ok).exec_()
+     proxy: %s
+     filter: %s
+     query: %s
+     error: %s ''' % (data.get('source'), data.get('target'), data.get('continuous'),
+                      data.get("proxy", ""), data.get("filter", ""), 
+                      data.get("query", ""), data.get('error')), QtGui.QMessageBox.Ok).exec_()
                     else:
                         QMessageBox(QMessageBox.Information, 'Information', 
 '''
 %s
     source: "%s"
     target: "%s"
-    continuous: %s ''' % (data.get('message'), data.get('source'), data.get('target'), data.get('continuous')), QtGui.QMessageBox.Ok).exec_()
+    continuous: %s
+    proxy: %s
+    filter: %s
+    query: %s
+     ''' % (data.get('message'), data.get('source'), data.get('target'), data.get('continuous'),
+            data.get("proxy", ""), data.get("filter", ""), 
+            data.get("query", "")), QtGui.QMessageBox.Ok).exec_()
                         selectedServer = self.ui.tlw_servers.model().data(self.ui.tlw_servers.currentIndex(),SERVER_INFO_ROLE)
                         if selectedServer.get('url') == data.get('url'):
                             pipe = self.server_workers.get(data.get('url')).get('pipe')
