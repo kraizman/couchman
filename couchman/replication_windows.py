@@ -156,7 +156,8 @@ class ReplicationWindow(QWidget):
             query = str(self.ui.txt_query.text())
             if query:
                 try:
-                    query = json.dumps(query)
+                    query = json.loads(query)
+                    
                 except:
                     QMessageBox(QMessageBox.Critical, 'Error', 'Error parsing query field', QtGui.QMessageBox.Ok).exec_()
                     return

@@ -114,13 +114,14 @@ class ReplicationWorker(multiprocessing.Process):
                             if self.query:
                                 args['query_params'] = self.query
                         if self.continuous:
+                            print "replicate url: source: %s, target: %s, continuous: true, args: %s" % (self.source, self.target, args,)
                             try:
                                 self.db_server.replicate(self.source, self.target, continuous=True, **args)
                             except:
                                 logging.debug("worker: replication creation error for %s" % self.server_address)
                                 error = sys.exc_info()[1]
                         else:
-                            
+                            print "replicate url: source: %s, target: %s, continuous: false, args: %s" % (self.source, self.target, args,)
                             try:
                                 self.db_server.replicate(self.source, self.target, **args)
                             except:

@@ -552,7 +552,7 @@ Error details:
             worker.get('thread').terminate()
    
         for rep in self.replication_workers:
-            rep.get('threat').terminate()
+            rep.get('thread').terminate()
             
         event.accept()
         
